@@ -189,6 +189,22 @@
 #ifndef MICROPY_PY_NETWORK_WLAN
 #define MICROPY_PY_NETWORK_WLAN             (1)
 #endif
+#ifndef MICROPY_PY_NETWORK_WLAN_CSI
+#if CONFIG_IDF_TARGET_ESP32P4
+// ESP32-P4: CSI not supported
+#define MICROPY_PY_NETWORK_WLAN_CSI         (0)
+#else
+// CSI disabled by default to reduce firmware size
+// Enable by setting MICROPY_PY_NETWORK_WLAN_CSI=1
+#define MICROPY_PY_NETWORK_WLAN_CSI         (0)
+#endif
+#endif
+#if MICROPY_PY_NETWORK_WLAN_CSI
+// CSI_DEFAULT_BUFFER_SIZE is used in modwifi_csi.h
+#ifndef MICROPY_PY_NETWORK_WLAN_CSI_DEFAULT_BUFFER_SIZE
+#define MICROPY_PY_NETWORK_WLAN_CSI_DEFAULT_BUFFER_SIZE (16)
+#endif
+#endif
 #ifndef MICROPY_HW_ENABLE_SDCARD
 #define MICROPY_HW_ENABLE_SDCARD            (1)
 #endif
