@@ -10,6 +10,26 @@ This is the MicroPython project, which aims to put an implementation
 of Python 3.x on microcontrollers and small embedded systems.
 You can find the official website at [micropython.org](http://www.micropython.org).
 
+<div align="center">
+
+## ⚠️ About this fork
+
+</div>
+
+> **📌 Fork Information**
+> 
+> This is a fork of the MicroPython project with the specific purpose of adding
+> support for extracting Channel State Information (CSI) data from the ESP32 port.
+> 
+> **Branch structure:**
+> - `master`: This branch is kept synchronized with the upstream MicroPython repository.
+> - `main`: This is the default development branch. It is periodically rebased on `master` and contains all fork-specific changes: first the README update, followed by all CSI-related commits.
+> - `esp32-add-csi-module`: This branch is used for the pull request to the upstream repository. It cherry-picks the necessary commits from `main` as needed (based on `master`).
+> 
+> This fork maintains the same MIT license as the original MicroPython project.
+
+---
+
 WARNING: this project is in beta stage and is subject to changes of the
 code-base, including project-wide name changes and API changes.
 
