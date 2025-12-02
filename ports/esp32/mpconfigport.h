@@ -196,7 +196,7 @@
 #else
 // CSI disabled by default to reduce firmware size
 // Enable by setting MICROPY_PY_NETWORK_WLAN_CSI=1
-#define MICROPY_PY_NETWORK_WLAN_CSI         (0)
+#define MICROPY_PY_NETWORK_WLAN_CSI         (1)
 #endif
 #endif
 #if MICROPY_PY_NETWORK_WLAN_CSI
