@@ -1,0 +1,9 @@
+set(SDKCONFIG_DEFAULTS
+    ${SDKCONFIG_DEFAULTS}
+    boards/sdkconfig.csi
+)
+
+list(APPEND MICROPY_DEF_BOARD
+    MICROPY_HW_BOARD_NAME="ESP32-C5 CSI"
+)
+
