@@ -104,12 +104,13 @@ def main():
     wlan = connect_wifi()
 
     packets = 0
+    frame = None
     csi_length_logged = False
     print("Starting CSI processing...\n")
 
     try:
         while True:
-            frame = wlan.csi_read()
+            frame = wlan.csi_read(frame)
 
             if frame:
                 csi_data = frame[5]  # data field

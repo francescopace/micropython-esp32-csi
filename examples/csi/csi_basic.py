@@ -76,6 +76,7 @@ def main():
     print("\nPress Ctrl+C to stop\n")
 
     frame_count = 0
+    frame = None
     try:
         while True:
             # Check if frames are available
@@ -83,7 +84,7 @@ def main():
             if available > 0:
                 print(f"\n[{frame_count}] {available} frame(s) available")
 
-                frame = wlan.csi_read()
+                frame = wlan.csi_read(frame)
                 if frame:
                     frame_count += 1
 

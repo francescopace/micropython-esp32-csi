@@ -27,6 +27,7 @@
 
 #include "py/mphal.h"
 #include "py/objarray.h"
+#include "py/objtuple.h"
 #include "py/runtime.h"
 #include "py/ringbuf.h"
 
@@ -227,6 +228,46 @@ static bool wifi_csi_read_frame(csi_frame_t *frame) {
     return result == 0;
 }
 
+static mp_obj_tuple_t *network_wlan_csi_get_result_tuple(mp_obj_t result_in) {
+    if (!mp_obj_is_tuple_compatible(result_in)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("result must be tuple"));
+    }
+
+    mp_obj_tuple_t *result = MP_OBJ_TO_PTR(result_in);
+    if (result->len != 22) {
+        mp_raise_ValueError(MP_ERROR_TEXT("result tuple has wrong size"));
+    }
+
+    if (!mp_obj_is_type(result->items[5], &mp_type_bytearray)) {
+        mp_raise_TypeError(MP_ERROR_TEXT("result data must be bytearray"));
+    }
+
+    return result;
+}
+
+static mp_obj_array_t *network_wlan_csi_update_data(mp_obj_t *data_obj, const csi_frame_t *frame) {
+    mp_obj_array_t *data = NULL;
+    if (*data_obj != mp_const_none) {
+        data = MP_OBJ_TO_PTR(*data_obj);
+        size_t capacity = data->len + data->free;
+        if (capacity < frame->len) {
+            data = NULL;
+        }
+    }
+
+    if (data == NULL) {
+        *data_obj = mp_obj_new_bytearray(frame->len, frame->data);
+        data = MP_OBJ_TO_PTR(*data_obj);
+        return data;
+    }
+
+    memcpy(data->items, frame->data, frame->len);
+    size_t capacity = data->len + data->free;
+    data->len = frame->len;
+    data->free = capacity - frame->len;
+    return data;
+}
+
 static mp_obj_t network_wlan_csi_enable(size_t n_args, const mp_obj_t *args, mp_map_t *kw_args) {
     (void)args[0];
 
@@ -262,44 +303,50 @@ static mp_obj_t network_wlan_csi_disable(mp_obj_t self_in) {
 }
 MP_DEFINE_CONST_FUN_OBJ_1(network_wlan_csi_disable_obj, network_wlan_csi_disable);
 
-static mp_obj_t network_wlan_csi_read(mp_obj_t self_in) {
-    (void)self_in;
+static mp_obj_t network_wlan_csi_read(size_t n_args, const mp_obj_t *args) {
+    (void)args[0];
 
     csi_frame_t frame;
     if (!wifi_csi_read_frame(&frame)) {
         return mp_const_none;
     }
 
-    mp_obj_t items[22];
-    items[0] = MP_OBJ_NEW_SMALL_INT(frame.rssi);
-    items[1] = MP_OBJ_NEW_SMALL_INT(frame.channel);
-    items[2] = mp_obj_new_bytes(frame.mac, sizeof(frame.mac));
-    items[3] = mp_obj_new_int(frame.timestamp_us);
-    items[4] = mp_obj_new_int(frame.local_timestamp);
+    mp_obj_tuple_t *result;
+    if (n_args > 1 && args[1] != mp_const_none) {
+        result = network_wlan_csi_get_result_tuple(args[1]);
+    } else {
+        result = MP_OBJ_TO_PTR(mp_obj_new_tuple(22, NULL));
+        result->items[5] = mp_const_none;
+    }
 
-    mp_obj_array_t *csi_data = MP_OBJ_TO_PTR(mp_obj_new_bytearray(frame.len, frame.data));
+    result->items[0] = MP_OBJ_NEW_SMALL_INT(frame.rssi);
+    result->items[1] = MP_OBJ_NEW_SMALL_INT(frame.channel);
+    result->items[2] = mp_obj_new_bytes(frame.mac, sizeof(frame.mac));
+    result->items[3] = mp_obj_new_int(frame.timestamp_us);
+    result->items[4] = mp_obj_new_int(frame.local_timestamp);
+
+    mp_obj_array_t *csi_data = network_wlan_csi_update_data(&result->items[5], &frame);
     csi_data->typecode = 'b';
-    items[5] = MP_OBJ_FROM_PTR(csi_data);
 
-    items[6] = MP_OBJ_NEW_SMALL_INT(frame.rate);
-    items[7] = MP_OBJ_NEW_SMALL_INT(frame.sig_mode);
-    items[8] = MP_OBJ_NEW_SMALL_INT(frame.mcs);
-    items[9] = MP_OBJ_NEW_SMALL_INT(frame.cwb);
-    items[10] = MP_OBJ_NEW_SMALL_INT(frame.smoothing);
-    items[11] = MP_OBJ_NEW_SMALL_INT(frame.not_sounding);
-    items[12] = MP_OBJ_NEW_SMALL_INT(frame.aggregation);
-    items[13] = MP_OBJ_NEW_SMALL_INT(frame.stbc);
-    items[14] = MP_OBJ_NEW_SMALL_INT(frame.fec_coding);
-    items[15] = MP_OBJ_NEW_SMALL_INT(frame.sgi);
-    items[16] = MP_OBJ_NEW_SMALL_INT(frame.noise_floor);
-    items[17] = MP_OBJ_NEW_SMALL_INT(frame.ampdu_cnt);
-    items[18] = MP_OBJ_NEW_SMALL_INT(frame.secondary_channel);
-    items[19] = MP_OBJ_NEW_SMALL_INT(frame.ant);
-    items[20] = MP_OBJ_NEW_SMALL_INT(frame.sig_len);
-    items[21] = MP_OBJ_NEW_SMALL_INT(frame.rx_state);
-    return mp_obj_new_tuple(MP_ARRAY_SIZE(items), items);
+    result->items[6] = MP_OBJ_NEW_SMALL_INT(frame.rate);
+    result->items[7] = MP_OBJ_NEW_SMALL_INT(frame.sig_mode);
+    result->items[8] = MP_OBJ_NEW_SMALL_INT(frame.mcs);
+    result->items[9] = MP_OBJ_NEW_SMALL_INT(frame.cwb);
+    result->items[10] = MP_OBJ_NEW_SMALL_INT(frame.smoothing);
+    result->items[11] = MP_OBJ_NEW_SMALL_INT(frame.not_sounding);
+    result->items[12] = MP_OBJ_NEW_SMALL_INT(frame.aggregation);
+    result->items[13] = MP_OBJ_NEW_SMALL_INT(frame.stbc);
+    result->items[14] = MP_OBJ_NEW_SMALL_INT(frame.fec_coding);
+    result->items[15] = MP_OBJ_NEW_SMALL_INT(frame.sgi);
+    result->items[16] = MP_OBJ_NEW_SMALL_INT(frame.noise_floor);
+    result->items[17] = MP_OBJ_NEW_SMALL_INT(frame.ampdu_cnt);
+    result->items[18] = MP_OBJ_NEW_SMALL_INT(frame.secondary_channel);
+    result->items[19] = MP_OBJ_NEW_SMALL_INT(frame.ant);
+    result->items[20] = MP_OBJ_NEW_SMALL_INT(frame.sig_len);
+    result->items[21] = MP_OBJ_NEW_SMALL_INT(frame.rx_state);
+    return MP_OBJ_FROM_PTR(result);
 }
-MP_DEFINE_CONST_FUN_OBJ_1(network_wlan_csi_read_obj, network_wlan_csi_read);
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(network_wlan_csi_read_obj, 1, 2, network_wlan_csi_read);
 
 static mp_obj_t network_wlan_csi_dropped(mp_obj_t self_in) {
     (void)self_in;

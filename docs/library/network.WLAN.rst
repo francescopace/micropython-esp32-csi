@@ -197,12 +197,18 @@ station capture.
 
    Disable CSI capture and clean up resources.
 
-.. method:: WLAN.csi_read()
+.. method:: WLAN.csi_read([result])
 
    Read a CSI frame from the buffer.
 
    **Returns:** A tuple containing CSI frame data, or ``None`` if no frames are
    available.
+
+   If the optional ``result`` argument is provided, it must be a previous tuple
+   returned by `WLAN.csi_read()`. The tuple will be updated in place and
+   returned again. This reduces heap churn in busy read loops by reusing the
+   existing tuple object and, when the captured frame fits, the existing CSI
+   data ``bytearray``.
 
    **Frame tuple fields (in order):**
 
