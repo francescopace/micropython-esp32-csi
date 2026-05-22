@@ -929,6 +929,8 @@ static const mp_rom_map_elem_t wlan_if_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_csi_read), MP_ROM_PTR(&network_wlan_csi_read_obj) },
     { MP_ROM_QSTR(MP_QSTR_csi_dropped), MP_ROM_PTR(&network_wlan_csi_dropped_obj) },
     { MP_ROM_QSTR(MP_QSTR_csi_available), MP_ROM_PTR(&network_wlan_csi_available_obj) },
+    { MP_ROM_QSTR(MP_QSTR_csi_force_gain), MP_ROM_PTR(&network_wlan_csi_force_gain_obj) },
+    { MP_ROM_QSTR(MP_QSTR_csi_gain_lock_supported), MP_ROM_PTR(&network_wlan_csi_gain_lock_supported_obj) },
     #endif
 
     // Constants

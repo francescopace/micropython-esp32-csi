@@ -61,6 +61,8 @@ typedef struct {
     uint8_t secondary_channel : 2;
     uint8_t ant : 2;
     uint8_t _reserved : 1;
+    uint8_t agc_gain;
+    int8_t fft_gain;
     uint8_t mac[6];
     int8_t data[CSI_MAX_DATA_LEN];
 } csi_frame_t;
@@ -83,6 +85,8 @@ extern const mp_obj_fun_builtin_fixed_t network_wlan_csi_disable_obj;
 extern const mp_obj_fun_builtin_var_t network_wlan_csi_read_obj;
 extern const mp_obj_fun_builtin_fixed_t network_wlan_csi_dropped_obj;
 extern const mp_obj_fun_builtin_fixed_t network_wlan_csi_available_obj;
+extern const mp_obj_fun_builtin_fixed_t network_wlan_csi_force_gain_obj;
+extern const mp_obj_fun_builtin_fixed_t network_wlan_csi_gain_lock_supported_obj;
 
 #endif // MICROPY_PY_NETWORK_WLAN_CSI
 
