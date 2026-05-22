@@ -21,7 +21,8 @@
     "url": "https://www.espressif.com/en/products/modules",
     "vendor": "Espressif",
     "variants": {
-        "SPIRAM_OCT": "Support for Octal-SPIRAM"
+        "SPIRAM_OCT": "Support for Octal-SPIRAM",
+        "CSI": "Wi-Fi CSI (Channel State Information) support enabled"
     },
     "old_variants": {
         "FLASH_4M": ["4MiB flash", "Use the standard variant instead."]

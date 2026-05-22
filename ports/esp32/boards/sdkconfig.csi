@@ -1,0 +1,2 @@
+# CSI support for the WLAN CSI variant.
+CONFIG_ESP_WIFI_CSI_ENABLED=y
